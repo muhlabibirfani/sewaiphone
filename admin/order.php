@@ -432,8 +432,8 @@
         <div class="main-content">
             <div class="header">
                 <h2>Kelola Pesanan</h2>
-                <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['user_name'], 0, 1)); ?></div>
-                <span><?php echo $_SESSION['user_name']; ?></span>
+                <div class="user-info">
+                    <!-- User info -->
                 </div>
             </div>
 
