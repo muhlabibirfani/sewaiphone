@@ -309,13 +309,6 @@ $base_url = "/uas2"; // Sesuaikan dengan base URL website Anda
         <div class="main-content">
             <div class="header">
                 <h2>Kelola Produk</h2>
-                <div class="user-info">
-                    <div class="user-avatar"><?php echo isset($_SESSION['user_name']) ? strtoupper(substr($_SESSION['user_name'], 0, 1)) : 'A'; ?></div>
-                    <span><?php echo isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Admin'; ?></span>
-                    <button class="btn btn-sm btn-primary mobile-menu-btn" id="mobileMenuBtn">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
             </div>
             
             <?php if(isset($_SESSION['success'])): ?>
