@@ -14,7 +14,7 @@ if (!$order_id || !$status) {
 }
 
 // Validate status against allowed values
-$allowed_statuses = ['pending', 'menunggupembayaran', 'dikirim', 'selesai', 'dibatalkan', 'dipinjam'];
+$allowed_statuses = ['pending', 'menunggupembayaran', 'menunggudikirim', 'dikirim','dipinjam', 'selesai', 'dibatalkan'];
 if (!in_array($status, $allowed_statuses)) {
     $_SESSION['error'] = "Status pesanan tidak valid";
     header("Location: order.php?id=" . $order_id);

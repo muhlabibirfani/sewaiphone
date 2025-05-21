@@ -19,6 +19,32 @@ $stmt = mysqli_prepare($conn, $query);
 mysqli_stmt_bind_param($stmt, "i", $user_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
+
+// Proses konfirmasi pesanan diterima (sudah sampai)
+if (isset($_POST['konfirmasi_terima']) && isset($_POST['order_id'])) {
+    $order_id = $_POST['order_id'];
+    // Verifikasi bahwa pesanan ini milik user yang sedang login
+    $check_query = "SELECT id FROM orders WHERE id = ? AND user_id = ? AND status = 'dikirim'";
+    $check_stmt = mysqli_prepare($conn, $check_query);
+    mysqli_stmt_bind_param($check_stmt, "ii", $order_id, $user_id);
+    mysqli_stmt_execute($check_stmt);
+    $check_result = mysqli_stmt_get_result($check_stmt);
+    
+    if (mysqli_num_rows($check_result) > 0) {
+        // Update status menjadi dipinjam
+        $update_query = "UPDATE orders SET status = 'dipinjam', updated_at = CURRENT_TIMESTAMP() WHERE id = ?";
+        $update_stmt = mysqli_prepare($conn, $update_query);
+        mysqli_stmt_bind_param($update_stmt, "i", $order_id);
+        
+        if (mysqli_stmt_execute($update_stmt)) {
+            // Redirect untuk refresh halaman
+            header("Location: riwayat_pesanan.php?status=received");
+            exit();
+        } else {
+            $error_message = "Terjadi kesalahan saat memperbarui status pesanan.";
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -153,7 +179,7 @@ $result = mysqli_stmt_get_result($stmt);
             grid-column: 1 / -1;
         }
         
-        .btn-bayar {
+        .btn-bayar, .btn-terima {
             display: inline-block;
             margin-left: 10px;
             padding: 3px 10px;
@@ -164,10 +190,33 @@ $result = mysqli_stmt_get_result($stmt);
             font-size: 0.8em;
             font-weight: bold;
             transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
         }
         
-        .btn-bayar:hover {
+        .btn-bayar:hover, .btn-terima:hover {
             background-color: #005bbf;
+        }
+
+        .btn-terima {
+            background-color: #28a745;
+        }
+        
+        .btn-terima:hover {
+            background-color: #218838;
+        }
+
+        .status-alert {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .status-alert.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
         
         @media (max-width: 768px) {
@@ -182,6 +231,12 @@ $result = mysqli_stmt_get_result($stmt);
     
     <div class="container">
         <h1><i class="fas fa-history"></i> Riwayat Pesanan</h1>
+        
+        <?php if (isset($_GET['status']) && $_GET['status'] == 'received'): ?>
+        <div class="status-alert success">
+            <i class="fas fa-check-circle"></i> Pesanan berhasil dikonfirmasi diterima. Status telah diubah menjadi "DIPINJAM".
+        </div>
+        <?php endif; ?>
         
         <div class="pesanan-list">
             <?php if (mysqli_num_rows($result) > 0): ?>
@@ -199,6 +254,7 @@ $result = mysqli_stmt_get_result($stmt);
                             $statusClass = "status-pending";
                             $statusText = "PENDING";
                             $showPaymentButton = false;
+                            $showReceiveButton = false;
                             
                             if (!empty($pesanan['status'])) {
                                 switch(strtolower($pesanan['status'])) {
@@ -218,6 +274,7 @@ $result = mysqli_stmt_get_result($stmt);
                                     case 'dikirim':
                                         $statusClass = "status-dikirim";
                                         $statusText = "DIKIRIM";
+                                        $showReceiveButton = true;
                                         break;
                                     case 'dipinjam':
                                         $statusClass = "status-dipinjam";
@@ -242,6 +299,15 @@ $result = mysqli_stmt_get_result($stmt);
                                 <a href="payment.php?order_id=<?= $pesanan['id'] ?>" class="btn-bayar">
                                     <i class="fas fa-credit-card"></i> Bayar Sekarang
                                 </a>
+                            <?php endif; ?>
+                            
+                            <?php if ($showReceiveButton): ?>
+                                <form method="post" style="display: inline;">
+                                    <input type="hidden" name="order_id" value="<?= $pesanan['id'] ?>">
+                                    <button type="submit" name="konfirmasi_terima" class="btn-terima">
+                                        <i class="fas fa-check-circle"></i> Sudah Sampai
+                                    </button>
+                                </form>
                             <?php endif; ?>
                         </div>
                         
@@ -281,9 +347,5 @@ $result = mysqli_stmt_get_result($stmt);
             <?php endif; ?>
         </div>
     </div>
-    
-    <script>
-        // Script untuk navbar (sudah ada di navbar.php)
-    </script>
 </body>
 </html>

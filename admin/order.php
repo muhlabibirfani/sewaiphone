@@ -362,6 +362,27 @@
             font-size: 14px;
         }
         
+        /* Alert styles */
+        .alert {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+        
         /* Responsive adjustments */
         @media (max-width: 992px) {
             .sidebar {
@@ -441,6 +462,19 @@
                     <!-- User info -->
                 </div>
             </div>
+            
+            <!-- Alert messages -->
+            <?php if(isset($_SESSION['success'])): ?>
+            <div class="alert alert-success">
+                <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+            </div>
+            <?php endif; ?>
+            
+            <?php if(isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger">
+                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+            </div>
+            <?php endif; ?>
 
             <div class="card">
                 <div class="card-header">
@@ -450,6 +484,7 @@
                             <option value="">Semua Status</option>
                             <option value="pending">Pending</option>
                             <option value="menunggupembayaran">Menunggu Pembayaran</option>
+                            <option value="menunggudikirim">Menunggu Dikirim</option>
                             <option value="dikirim">Dikirim</option>
                             <option value="selesai">Selesai</option>
                             <option value="dibatalkan">Dibatalkan</option>
@@ -530,7 +565,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Ubah Status Pesanan</h3>
-                <span onclick="closeStatusModal()">&times;</span>
+                <span onclick="closeStatusModal()" class="close">&times;</span>
             </div>
             <form id="statusForm" method="post" action="update_status.php">
                 <input type="hidden" name="order_id" id="modalOrderId">
@@ -571,7 +606,7 @@
 
         document.getElementById('statusFilter').addEventListener('change', function() {
             const status = this.value;
-            window.location.href = `orders.php${status ? '?status=' + encodeURIComponent(status) : ''}`;
+            window.location.href = `order.php${status ? '?status=' + encodeURIComponent(status) : ''}`;
         });
 
         function openStatusModal(orderId, currentStatus) {
