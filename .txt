@@ -1,5 +1,10 @@
-fungsi php
+tutor update
 git pull
 git add .
 git commit -m "deskripsi"
 git push
+
+tutor ambil file
+cd "folder"
+git --version
+git pull
