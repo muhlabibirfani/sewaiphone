@@ -98,7 +98,7 @@ $sql = [
         user_id INT NOT NULL,
         reason VARCHAR(100) NOT NULL,
         description TEXT NOT NULL,
-        status ENUM('pending', 'diproses', 'diterima', 'ditolak') DEFAULT 'pending',
+        status ENUM('pending', 'menunggupembayaran', 'menunggukonfirmasi', 'dikirim', 'dipinjam', 'selesai', 'dibatalkan'),
         admin_notes TEXT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
