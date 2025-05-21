@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             // Update status order
             $update_order = "UPDATE orders SET 
-                status = 'menunggukonfirmasi', 
+                status = 'menunggudikirim'
                 WHERE id = ?";
             $stmt = mysqli_prepare($conn, $update_order);
             mysqli_stmt_bind_param($stmt, "i", $order_id);

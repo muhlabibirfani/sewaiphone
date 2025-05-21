@@ -17,18 +17,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $description = $_POST['description'];
         $user_id = $_SESSION['user_id'];
         
-        // Validate order exists and belongs to user - THIS WAS THE MAIN ERROR FIXED
+        // Validate order exists and belongs to user
         $stmt = $conn->prepare("SELECT o.id, p.nama_produk, o.status 
                                 FROM orders o 
                                 JOIN produk p ON o.produk_id = p.id 
                                 WHERE o.id = ? AND o.user_id = ?");
-        $stmt->bind_param("ii", $order_id, $user_id); // Fixed parameter order
+        $stmt->bind_param("ii", $order_id, $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
         
         if ($result->num_rows == 0) {
             $error = "Order ID tidak valid atau tidak ditemukan.";
         } else {
+            $order = $result->fetch_assoc();
+            
             // Check if return request already exists
             $check_stmt = $conn->prepare("SELECT id FROM returns WHERE order_id = ?");
             $check_stmt->bind_param("i", $order_id);
@@ -38,22 +40,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($check_result->num_rows > 0) {
                 $error = "Anda sudah mengajukan pengembalian untuk pesanan ini sebelumnya.";
             } else {
-                // Insert return request
-                $stmt = $conn->prepare("INSERT INTO returns (order_id, user_id, reason, description, status, created_at) 
-                                      VALUES (?, ?, ?, ?, 'pending', NOW())");
-                $stmt->bind_param("iiss", $order_id, $user_id, $reason, $description);
+                // Mulai transaksi database
+                $conn->begin_transaction();
                 
-                if ($stmt->execute()) {
+                try {
+                    // Insert return request
+                    $stmt = $conn->prepare("INSERT INTO returns (order_id, user_id, reason, description, status, created_at) 
+                                          VALUES (?, ?, ?, ?, 'pending', NOW())");
+                    $stmt->bind_param("iiss", $order_id, $user_id, $reason, $description);
+                    
+                    if (!$stmt->execute()) {
+                        throw new Exception("Gagal menyimpan pengajuan pengembalian");
+                    }
+                    
+                    // Update order status to "selesai"
+                    $update_stmt = $conn->prepare("UPDATE orders SET status = 'selesai' WHERE id = ?");
+                    $update_stmt->bind_param("i", $order_id);
+                    
+                    if (!$update_stmt->execute()) {
+                        throw new Exception("Gagal mengupdate status pesanan");
+                    }
+                    
                     // Log the return
                     $return_id = $stmt->insert_id;
                     $log_stmt = $conn->prepare("INSERT INTO return_logs (return_id, user_id, action, notes) 
                                               VALUES (?, ?, 'Pengajuan pengembalian', 'Pengembalian diajukan oleh pelanggan')");
                     $log_stmt->bind_param("ii", $return_id, $user_id);
-                    $log_stmt->execute();
                     
-                    $success = "Permintaan pengembalian berhasil diajukan. Kami akan menghubungi Anda dalam 1-2 hari kerja.";
-                } else {
-                    $error = "Terjadi kesalahan. Silakan coba lagi.";
+                    if (!$log_stmt->execute()) {
+                        throw new Exception("Gagal mencatat log pengembalian");
+                    }
+                    
+                    // Commit transaksi jika semua berhasil
+                    $conn->commit();
+                    
+                    $success = "Permintaan pengembalian berhasil diajukan. Status pesanan telah diubah menjadi Selesai. Kami akan menghubungi Anda dalam 1-2 hari kerja.";
+                } catch (Exception $e) {
+                    // Rollback jika ada error
+                    $conn->rollback();
+                    $error = "Terjadi kesalahan: " . $e->getMessage();
                 }
             }
         }

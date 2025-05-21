@@ -117,7 +117,7 @@ $result = mysqli_stmt_get_result($stmt);
             color: #856404;
         }
 
-        .status-menunggukonfirmasi {
+        .status-menunggudikirim {
             background-color:rgb(215, 245, 186);
             color:rgb(90, 179, 7);
         }
@@ -211,10 +211,9 @@ $result = mysqli_stmt_get_result($stmt);
                                         $statusText = "MENUNGGU PEMBAYARAN";
                                         $showPaymentButton = true;
                                         break;
-                                    case 'menunggukonfirmasi':
-                                        $statusClass = "status-menunggukonfirmasi";
-                                        $statusText = "MENUNGGU KONFIRMASI";
-                                        $showPaymentButton = true;
+                                    case 'menunggudikirim':
+                                        $statusClass = "status-menunggudikirim";
+                                        $statusText = "MENUNGGU DIKIRIM";
                                         break;
                                     case 'dikirim':
                                         $statusClass = "status-dikirim";
@@ -233,9 +232,6 @@ $result = mysqli_stmt_get_result($stmt);
                                         $statusText = "DIBATALKAN";
                                         break;
                                     default:
-                                        // Default to pending if not recognized
-                                        $statusClass = "status-pending";
-                                        $statusText = "PENDING";
                                 }
                             }
                             ?>

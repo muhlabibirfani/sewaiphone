@@ -212,7 +212,7 @@
             color: #856404;
         }
 
-        .badge-menunggukonfirmasi {
+        .badge-menunggudikirim {
             background-color:rgb(215, 245, 186);
             color:rgb(90, 179, 7);
         }
@@ -539,7 +539,7 @@
                     <select name="status" id="modalStatus" class="form-control" required>
                         <option value="pending">Pending</option>
                         <option value="menunggupembayaran">Menunggu Pembayaran</option>
-                        <option value="menunggukonfirmasi">Menunggu Konfirmasi</option>
+                        <option value="menunggudikirim">Menunggu Dikirim</option>
                         <option value="dikirim">Dikirim</option>
                         <option value="dipinjam">Dipinjam</option>
                         <option value="selesai">Selesai</option>
