@@ -67,7 +67,7 @@ $sql = [
         order_id INT NOT NULL,
         amount DECIMAL(12,2) NOT NULL,
         method ENUM('transfer','qris') NOT NULL,
-        status ENUM('pending', 'menunggupembayaran', 'dikirim', 'selesai', 'dibatalkan', 'dipinjam') DEFAULT 'pending',
+        status ENUM('pending', 'menunggupembayaran', 'menunggukonfirmasi','dikirim', 'dipinjam', 'selesai', 'dibatalkan') DEFAULT 'pending',
         payment_proof VARCHAR(255),
         transaction_id VARCHAR(100),
         payment_date DATETIME,
