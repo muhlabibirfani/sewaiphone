@@ -9,4 +9,5 @@ cd "folder"
 git --version
 git pull
 
-akhir tutor jguigiu
+akhir tutor 
+tes git (kentung)
