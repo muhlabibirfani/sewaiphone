@@ -39,7 +39,7 @@ $sql = [
     tanggal_sewa DATE NOT NULL,
     tanggal_kembali DATE NOT NULL,
     total_harga DECIMAL(10,2) NOT NULL,
-    status ENUM('pending', 'menunggupembayaran', 'dikirim', 'selesai', 'dibatalkan', 'dipinjam') DEFAULT 'pending',
+    status ENUM('pending', 'menunggupembayaran', 'menunggukonfirmasi', 'dikirim', 'dipinjam', 'selesai', 'dibatalkan') DEFAULT 'pending',
     payment_method ENUM('transfer','qris') DEFAULT 'transfer',
     shipping_code VARCHAR(20) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 // Mengubah query untuk menggunakan tabel orders dengan semua kolom yang diperlukan
+
 $query = "SELECT o.id, o.produk_id, p.nama_produk as nama, o.status, o.created_at, 
                  o.tanggal_sewa, o.tanggal_kembali, o.total_harga 
           FROM orders o 
@@ -115,6 +116,11 @@ $result = mysqli_stmt_get_result($stmt);
             background-color:rgb(249, 233, 186);
             color: #856404;
         }
+
+        .status-menunggukonfirmasi {
+            background-color:rgb(215, 245, 186);
+            color:rgb(90, 179, 7);
+        }
         
         .status-dikirim {
             background-color: #d1ecf1;
@@ -203,6 +209,11 @@ $result = mysqli_stmt_get_result($stmt);
                                     case 'menunggupembayaran':
                                         $statusClass = "status-menunggupembayaran";
                                         $statusText = "MENUNGGU PEMBAYARAN";
+                                        $showPaymentButton = true;
+                                        break;
+                                    case 'menunggukonfirmasi':
+                                        $statusClass = "status-menunggukonfirmasi";
+                                        $statusText = "MENUNGGU KONFIRMASI";
                                         $showPaymentButton = true;
                                         break;
                                     case 'dikirim':
