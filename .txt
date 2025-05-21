@@ -8,3 +8,5 @@ tutor ambil file
 cd "folder"
 git --version
 git pull
+
+akhir tutor jguigiu
