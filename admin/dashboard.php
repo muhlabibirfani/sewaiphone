@@ -335,9 +335,6 @@
                 <div class="user-info">
                     <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['user_name'], 0, 1)); ?></div>
                     <span><?php echo $_SESSION['user_name']; ?></span>
-                    <button class="btn btn-sm btn-primary mobile-menu-btn" id="mobileMenuBtn">
-                        <i class="fas fa-bars"></i>
-                    </button>
                 </div>
             </div>
             
