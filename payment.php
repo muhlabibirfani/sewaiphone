@@ -206,8 +206,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['error'] = $e->getMessage();
     }
 }
-
-// HTML form remains the same as before
 ?>
 
 <!DOCTYPE html>
@@ -382,6 +380,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-bottom: 20px;
             border-radius: 5px;
         }
+        /* Style for the confirmation button */
+        .confirmation-button {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            transition: background-color 0.2s ease;
+        }
+        .confirmation-button:hover {
+            background-color: #005bb5;
+        }
     </style>
 </head>
 <body>
@@ -423,7 +439,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="payment-methods">
             <h2>Pilih Jenis Pembayaran</h2>
 
-            <form method="POST" action="payment.php" enctype="multipart/form-data">
+            <form method="POST" action="payment_succes.php" enctype="multipart/form-data" id="paymentForm">
                 <!-- Payment Type Selection -->
                  
                 <div class="payment-type-selector">
@@ -490,44 +506,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <small>Format: JPG, PNG, atau PDF (Maks. 2MB)</small>
                     </div>
                 </div>
-                
-                <!-- Credit Card Form -->
-                <div id="credit_card_details" class="bank-details" style="<?php echo isset($_POST['payment_method']) && $_POST['payment_method'] == 'credit_card' ? 'display: block;' : ''; ?>">
-                    <div class="form-group">
-                        <label for="card_number">Nomor Kartu</label>
-                        <input type="text" name="card_number" id="card_number" placeholder="1234 5678 9012 3456" required>
-                    </div>
-                    
-                    <div style="display: flex; gap: 15px;">
-                        <div class="form-group" style="flex: 1;">
-                            <label for="expiry_date">Tanggal Kadaluarsa</label>
-                            <input type="text" name="expiry_date" id="expiry_date" placeholder="MM/YY" required>
-                        </div>
-                        
-                        <div class="form-group" style="flex: 1;">
-                            <label for="cvv">CVV</label>
-                            <input type="text" name="cvv" id="cvv" placeholder="123" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="card_name">Nama pada Kartu</label>
-                        <input type="text" name="card_name" id="card_name" placeholder="NAMA LENGKAP" required>
-                    </div>
-                    
-                    <!-- Tambahan untuk transaction_id dan notes -->
-                    <div class="form-group">
-                        <label for="transaction_id_cc">ID Transaksi (Dari Bank)</label>
-                        <input type="text" name="transaction_id" id="transaction_id_cc" placeholder="TRX123456789" required>
-                        <small>ID transaksi yang diterima dari bank/penyedia pembayaran</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="notes_cc">Catatan Tambahan (Opsional)</label>
-                        <textarea name="notes" id="notes_cc" rows="3" placeholder="Misal: Pembayaran via Visa Card ending 3456"></textarea>
-                    </div>
-                </div>
-                
                 <!-- QRIS Details -->
                 <div id="qris_details" class="bank-details" style="<?php echo isset($_POST['payment_method']) && $_POST['payment_method'] == 'qris' ? 'display: block;' : ''; ?>">
                     <div style="text-align: center; margin: 20px 0;">
@@ -569,7 +547,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                 </div>
                 
-                <button type="submit">Konfirmasi Pembayaran</button>
+                <!-- Menggunakan input type submit dengan class confirmation-button -->
+                <input type="submit" value="Konfirmasi Pembayaran" class="confirmation-button">
             </form>
         </div>
     </div>
@@ -596,13 +575,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 const method = this.dataset.method;
                 
                 document.getElementById('bank_transfer_details').style.display = 'none';
-                document.getElementById('credit_card_details').style.display = 'none';
                 document.getElementById('qris_details').style.display = 'none';
                 
                 if (method === 'transfer') {
                     document.getElementById('bank_transfer_details').style.display = 'block';
-                } else if (method === 'credit_card') {
-                    document.getElementById('credit_card_details').style.display = 'block';
                 } else if (method === 'qris') {
                     document.getElementById('qris_details').style.display = 'block';
                 }
@@ -644,39 +620,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Format number with thousands separator
         function formatNumber(number) {
             return new Intl.NumberFormat('id-ID').format(number);
-        }
-        
-        // Credit card input formatting
-        const cardNumberInput = document.getElementById('card_number');
-        if (cardNumberInput) {
-            cardNumberInput.addEventListener('input', function(e) {
-                // Remove all non-digit characters
-                let value = this.value.replace(/\D/g, '');
-                
-                // Add space every 4 digits
-                if (value.length > 0) {
-                    value = value.match(/.{1,4}/g).join(' ');
-                }
-                
-                // Update the input value
-                this.value = value;
-            });
-        }
-        
-        const expiryDateInput = document.getElementById('expiry_date');
-        if (expiryDateInput) {
-            expiryDateInput.addEventListener('input', function(e) {
-                // Remove all non-digit characters
-                let value = this.value.replace(/\D/g, '');
-                
-                // Format as MM/YY
-                if (value.length > 2) {
-                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
-                }
-                
-                // Update the input value
-                this.value = value;
-            });
         }
     </script>
 </body>
