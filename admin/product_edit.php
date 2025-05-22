@@ -1,21 +1,19 @@
 <?php
-include '../config.php';
+require_once '../config.php';
 
-// Check if user is admin, redirect to login if not
 if (!isAdmin()) {
     header("Location: ../login.php");
     exit;
 }
 
-// Validate product ID exists in URL
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+if (!isset($_GET['id'])) {
     header("Location: products.php");
     exit;
 }
 
 $product_id = intval($_GET['id']);
 
-// Get product data with prepared statement
+// Get product data
 $query = "SELECT * FROM produk WHERE id = ?";
 $stmt = mysqli_prepare($conn, $query);
 mysqli_stmt_bind_param($stmt, "i", $product_id);
@@ -23,32 +21,29 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $product = mysqli_fetch_assoc($result);
 
-// If product not found, redirect
 if (!$product) {
     header("Location: products.php");
     exit;
 }
 
 $errors = [];
-$old_image = $product['gambar'] ?? '';
+$old_image = $product['gambar'];
 
-// Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Sanitize and collect form data
-    $product['nama'] = clean_input($_POST['nama'] ?? '');
-    $product['deskripsi'] = clean_input($_POST['deskripsi'] ?? '');
-    $product['harga'] = clean_input($_POST['harga'] ?? '');
-    $product['stok'] = clean_input($_POST['stok'] ?? '');
-    $product['stok_tersedia'] = clean_input($_POST['stok_tersedia'] ?? '');
-    $product['status'] = clean_input($_POST['status'] ?? 'Regular');
+    $product['nama_produk'] = clean_input($_POST['nama_produk']);
+    $product['deskripsi'] = clean_input($_POST['deskripsi']);
+    $product['harga_sewa'] = clean_input($_POST['harga_sewa']);
+    $product['stok'] = clean_input($_POST['stok']);
+    $product['stok_tersedia'] = clean_input($_POST['stok_tersedia']);
+    $product['is_new'] = isset($_POST['is_new']) ? 1 : 0;
     
     // Validate inputs
-    if (empty($product['nama'])) {
-        $errors['nama'] = 'Nama produk wajib diisi';
+    if (empty($product['nama_produk'])) {
+        $errors['nama_produk'] = 'Nama produk wajib diisi';
     }
     
-    if (!is_numeric($product['harga']) || $product['harga'] <= 0) {
-        $errors['harga'] = 'Harga harus berupa angka positif';
+    if (!is_numeric($product['harga_sewa']) || $product['harga_sewa'] <= 0) {
+        $errors['harga_sewa'] = 'Harga harus berupa angka positif';
     }
     
     if (!is_numeric($product['stok']) || $product['stok'] < 0) {
@@ -57,10 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (!is_numeric($product['stok_tersedia']) || $product['stok_tersedia'] < 0) {
         $errors['stok_tersedia'] = 'Stok tersedia harus berupa angka positif';
-    }
-    
-    if ($product['stok_tersedia'] > $product['stok']) {
-        $errors['stok_tersedia'] = 'Stok tersedia tidak boleh lebih dari total stok';
     }
     
     // Handle image upload if new image is provided
@@ -75,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // Delete old image if exists
-            if ($old_image && file_exists('../../images/' . $old_image)) {
-                unlink('../../images/' . $old_image);
+            if ($old_image && file_exists('../../images/products/' . $old_image)) {
+                unlink('../../images/products/' . $old_image);
             }
             
             $file_ext = pathinfo($_FILES['gambar']['name'], PATHINFO_EXTENSION);
@@ -84,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $file_path = $upload_dir . $file_name;
             
             if (move_uploaded_file($_FILES['gambar']['tmp_name'], $file_path)) {
-                $product['gambar'] = 'products/' . $file_name;
+                $product['gambar'] = $file_name;
             } else {
                 $errors['gambar'] = 'Gagal mengunggah gambar';
             }
@@ -99,23 +90,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no errors, update the product
     if (empty($errors)) {
         $query = "UPDATE produk SET 
-                 nama = ?, 
+                 nama_produk = ?, 
                  deskripsi = ?, 
-                 harga = ?, 
-                 stok = ?,
+                 harga_sewa = ?, 
+                 stok = ?, 
                  stok_tersedia = ?,
-                 status = ?,
+                 is_new = ?,
                  gambar = ?,
                  updated_at = NOW()
                  WHERE id = ?";
         $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "ssdiissi", 
-            $product['nama'], 
+        mysqli_stmt_bind_param($stmt, "ssdiiisi", 
+            $product['nama_produk'], 
             $product['deskripsi'], 
-            $product['harga'], 
+            $product['harga_sewa'], 
             $product['stok'],
             $product['stok_tersedia'],
-            $product['status'],
+            $product['is_new'],
             $product['gambar'],
             $product_id
         );
@@ -132,20 +123,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Produk | Fanzzervice</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/admin.css">
     <style>
-        .card {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            flex: 1;
             padding: 20px;
+            background-color: #fff;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .header h2 {
+            margin: 0;
+            color: #444;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #4e73df;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
         }
         
         .form-container {
@@ -157,16 +198,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 20px;
         }
         
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
         .form-control {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
         }
         
         .btn-primary {
-            background-color: #007bff;
+            background-color: #4e73df;
             color: white;
         }
         
@@ -175,50 +240,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: white;
         }
         
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-right: 10px;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        .btn i {
-            margin-right: 5px;
-        }
-        
         .error-message {
-            color: #dc3545;
-            font-size: 12px;
+            color: #e74a3b;
+            font-size: 13px;
             margin-top: 5px;
             display: block;
         }
         
         .alert {
-            padding: 15px;
+            padding: 10px 15px;
             border-radius: 4px;
             margin-bottom: 20px;
         }
         
         .alert-danger {
             background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
         
         .image-preview {
             width: 200px;
             height: 200px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 1px dashed #ddd;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
             margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
         }
         
         .image-preview img {
@@ -227,107 +277,167 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             object-fit: contain;
         }
         
-        .status-select {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+        .text-muted {
+            color: #6c757d;
+            font-size: 12px;
         }
         
-        .two-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #4e73df;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box h4 {
+            margin-top: 0;
+            color: #4e73df;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            width: 150px;
+        }
+        
+        .info-value {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-container {
+                flex-direction: column;
+            }
+            
+            .info-row {
+                flex-direction: column;
+            }
+            
+            .info-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="admin-container">
-        <?php include 'sidebar.php'; ?>
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>Fanzzervice</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="orders.php"><i class="fas fa-shopping-cart"></i> Pesanan</a></li>
+                <li><a href="products.php" class="active"><i class="fas fa-mobile"></i> Produk</a></li>
+                <li><a href="customers.php"><i class="fas fa-users"></i> Pelanggan</a></li>
+                <li><a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
         
+        <!-- Main Content -->
         <div class="main-content">
             <div class="header">
-                <h2><i class="fas fa-edit"></i> Edit Produk</h2>
+                <h2>Edit Produk</h2>
                 <div class="user-info">
-                    <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['user_name'] ?? 'A', 0, 1)); ?></div>
-                    <span><?php echo $_SESSION['user_name'] ?? 'Admin'; ?></span>
+                    <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['user_name'], 0, 1)); ?></div>
+                    <span><?php echo $_SESSION['user_name']; ?></span>
                     <button class="btn btn-sm btn-primary mobile-menu-btn" id="mobileMenuBtn">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
             </div>
             
+            <?php if(isset($_SESSION['success'])): ?>
+                <div class="alert alert-success" style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                    <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+                </div>
+            <?php endif; ?>
+            
             <?php if(isset($_SESSION['error'])): ?>
-                <div class="alert alert-danger">
-                    <?php 
-                        echo $_SESSION['error']; 
-                        unset($_SESSION['error']);
-                    ?>
+                <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                    <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
                 </div>
             <?php endif; ?>
             
             <div class="card">
+                <div class="info-box">
+                    <h4>Informasi Produk</h4>
+                    <div class="info-row">
+                        <div class="info-label">Tanggal Ditambahkan:</div>
+                        <div class="info-value"><?php echo date('d M Y', strtotime($product['created_at'])); ?></div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Terakhir Diupdate:</div>
+                        <div class="info-value"><?php echo date('d M Y', strtotime($product['updated_at'])); ?></div>
+                    </div>
+                </div>
+                
                 <div class="form-container">
                     <form method="POST" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label for="nama">Nama Produk</label>
-                            <input type="text" id="nama" name="nama" class="form-control" 
-                                   value="<?php echo htmlspecialchars($product['nama'] ?? ''); ?>" required>
-                            <?php if(isset($errors['nama'])): ?>
-                                <span class="error-message"><?php echo $errors['nama']; ?></span>
+                            <label for="nama_produk">Nama Produk</label>
+                            <input type="text" id="nama_produk" name="nama_produk" class="form-control" 
+                                   value="<?php echo htmlspecialchars($product['nama_produk']); ?>" required>
+                            <?php if(isset($errors['nama_produk'])): ?>
+                                <span class="error-message"><?php echo $errors['nama_produk']; ?></span>
                             <?php endif; ?>
                         </div>
                         
                         <div class="form-group">
                             <label for="deskripsi">Deskripsi</label>
-                            <textarea id="deskripsi" name="deskripsi" class="form-control" rows="4"><?php echo htmlspecialchars($product['deskripsi'] ?? ''); ?></textarea>
+                            <textarea id="deskripsi" name="deskripsi" class="form-control" rows="4"><?php echo htmlspecialchars($product['deskripsi']); ?></textarea>
                         </div>
                         
-                        <div class="two-columns">
-                            <div class="form-group">
-                                <label for="harga">Harga Sewa (Rp)</label>
-                                <input type="number" id="harga" name="harga" class="form-control" 
-                                       value="<?php echo htmlspecialchars($product['harga'] ?? ''); ?>" required>
-                                <?php if(isset($errors['harga'])): ?>
-                                    <span class="error-message"><?php echo $errors['harga']; ?></span>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="status">Status</label>
-                                <select id="status" name="status" class="form-control status-select">
-                                    <option value="Regular" <?php echo ($product['status'] ?? '') === 'Regular' ? 'selected' : ''; ?>>Regular</option>
-                                    <option value="Baru" <?php echo ($product['status'] ?? '') === 'Baru' ? 'selected' : ''; ?>>Baru</option>
-                                    <option value="Diskon" <?php echo ($product['status'] ?? '') === 'Diskon' ? 'selected' : ''; ?>>Diskon</option>
-                                    <option value="Habis" <?php echo ($product['status'] ?? '') === 'Habis' ? 'selected' : ''; ?>>Habis</option>
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label for="harga_sewa">Harga Sewa (Rp)</label>
+                            <input type="number" id="harga_sewa" name="harga_sewa" class="form-control" 
+                                   value="<?php echo htmlspecialchars($product['harga_sewa']); ?>" required>
+                            <?php if(isset($errors['harga_sewa'])): ?>
+                                <span class="error-message"><?php echo $errors['harga_sewa']; ?></span>
+                            <?php endif; ?>
                         </div>
                         
-                        <div class="two-columns">
-                            <div class="form-group">
-                                <label for="stok">Total Stok</label>
-                                <input type="number" id="stok" name="stok" class="form-control" 
-                                       value="<?php echo htmlspecialchars($product['stok'] ?? ''); ?>" required>
-                                <?php if(isset($errors['stok'])): ?>
-                                    <span class="error-message"><?php echo $errors['stok']; ?></span>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="stok_tersedia">Stok Tersedia</label>
-                                <input type="number" id="stok_tersedia" name="stok_tersedia" class="form-control" 
-                                       value="<?php echo htmlspecialchars($product['stok_tersedia'] ?? $product['stok'] ?? ''); ?>" required>
-                                <?php if(isset($errors['stok_tersedia'])): ?>
-                                    <span class="error-message"><?php echo $errors['stok_tersedia']; ?></span>
-                                <?php endif; ?>
-                            </div>
+                        <div class="form-group">
+                            <label for="stok">Total Stok</label>
+                            <input type="number" id="stok" name="stok" class="form-control" 
+                                   value="<?php echo htmlspecialchars($product['stok']); ?>" required>
+                            <?php if(isset($errors['stok'])): ?>
+                                <span class="error-message"><?php echo $errors['stok']; ?></span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="stok_tersedia">Stok Tersedia</label>
+                            <input type="number" id="stok_tersedia" name="stok_tersedia" class="form-control" 
+                                   value="<?php echo htmlspecialchars($product['stok_tersedia']); ?>" required>
+                            <?php if(isset($errors['stok_tersedia'])): ?>
+                                <span class="error-message"><?php echo $errors['stok_tersedia']; ?></span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="is_new" name="is_new" value="1" <?php echo $product['is_new'] ? 'checked' : ''; ?>>
+                            <label for="is_new">Tandai sebagai Produk Baru</label>
                         </div>
                         
                         <div class="form-group">
                             <label for="gambar">Gambar Produk</label>
                             <div class="image-preview" id="imagePreview">
                                 <?php if (!empty($product['gambar'])): ?>
-                                    <img id="previewImage" src="../../images/<?php echo htmlspecialchars($product['gambar']); ?>" alt="Preview Gambar">
+                                    <img id="previewImage" src="../../images/products/<?php echo $product['gambar']; ?>" alt="Preview Gambar">
                                     <span id="previewText" style="display:none">Pilih gambar untuk melihat preview</span>
                                 <?php else: ?>
                                     <img id="previewImage" src="#" alt="Preview Gambar" style="display:none">
@@ -364,14 +474,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         // Mobile menu toggle
         document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar) {
-                sidebar.classList.toggle('active');
-            }
+            document.getElementById('sidebar').classList.toggle('active');
         });
         
         // Image preview
         const imageInput = document.getElementById('gambar');
+        const imagePreview = document.getElementById('imagePreview');
         const previewImage = document.getElementById('previewImage');
         const previewText = document.getElementById('previewText');
         
@@ -392,23 +500,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else if (previewImage.getAttribute('src') === "#") {
                 previewText.style.display = "block";
                 previewImage.style.display = "none";
-            }
-        });
-        
-        // Ensure stok_tersedia doesn't exceed stok
-        const stokInput = document.getElementById('stok');
-        const stokTersediaInput = document.getElementById('stok_tersedia');
-        
-        stokInput.addEventListener('change', function() {
-            if (parseInt(stokTersediaInput.value) > parseInt(this.value)) {
-                stokTersediaInput.value = this.value;
-            }
-        });
-        
-        stokTersediaInput.addEventListener('change', function() {
-            if (parseInt(this.value) > parseInt(stokInput.value)) {
-                this.value = stokInput.value;
-                alert('Stok tersedia tidak boleh melebihi total stok!');
             }
         });
     </script>
