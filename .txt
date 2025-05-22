@@ -16,7 +16,7 @@ tes git (kentung)
 tombol konfirmasi sudah fix
 
 To do list
-1. Menambahkan metode pembayaran (perbaikan)
+1. Menambahkan metode pembayaran (pembaruan)
 2. menambahkan fitur bila stock berubah jika sudah di acc oleh admin (done)
 3. Jika tidak di acc selama 24 jam maka otomatis di batalkan (tydack jadi ditambahkan)
 4. Menambahkan fitur crud pada produk (done)
