@@ -143,6 +143,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             min-height: 100vh;
         }
         
+        .sidebar {
+            width: 280px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            z-index: 100;
+            border-right: 1px solid #eee;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sidebar-header i {
+            color: #007bff;
+            margin-right: 10px;
+            font-size: 24px;
+        }
+        
+        .sidebar-header h3 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 15px 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 16px;
+        }
+        
+        .sidebar-menu li a:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar-menu li a.active {
+            background-color: #e8f3ff;
+            color: #007bff;
+            border-left: 3px solid #007bff;
+        }
+        
+        .sidebar-menu li a i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+        
         .main-content {
             flex: 1;
             padding: 20px;
@@ -340,10 +404,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <ul class="sidebar-menu">
                 <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="orders.php"><i class="fas fa-shopping-cart"></i> Pesanan</a></li>
+                <li><a href="./order.php"><i class="fas fa-shopping-cart"></i> Pesanan</a></li>
                 <li><a href="products.php" class="active"><i class="fas fa-mobile"></i> Produk</a></li>
-                <li><a href="customers.php"><i class="fas fa-users"></i> Pelanggan</a></li>
-                <li><a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                <li><a href="./logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
         
@@ -352,11 +415,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="header">
                 <h2>Edit Produk</h2>
                 <div class="user-info">
-                    <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['user_name'], 0, 1)); ?></div>
-                    <span><?php echo $_SESSION['user_name']; ?></span>
-                    <button class="btn btn-sm btn-primary mobile-menu-btn" id="mobileMenuBtn">
-                        <i class="fas fa-bars"></i>
-                    </button>
                 </div>
             </div>
             

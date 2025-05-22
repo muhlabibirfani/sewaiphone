@@ -251,6 +251,7 @@ while ($row = $result->fetch_assoc()) {
                     <option value="Produk cacat">Produk cacat</option>
                     <option value="Tidak sesuai deskripsi">Tidak sesuai deskripsi</option>
                     <option value="Pesanan salah">Pesanan salah</option>
+                    <option value="Selesai sewa">Selesai sewa</option>
                     <option value="Lainnya">Lainnya</option>
                 </select>
             </div>

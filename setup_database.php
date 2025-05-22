@@ -48,24 +48,6 @@ $sql = [
         FOREIGN KEY (user_id) REFERENCES users(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
 
-    // Stock mutations table - VERSION TERBARU YANG SESUAI DENGAN PROGRAM
-    "CREATE TABLE IF NOT EXISTS stock_mutations (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        produk_id INT NOT NULL,
-        order_id INT,
-        return_id INT,
-        type ENUM('in','out') NOT NULL COMMENT 'in untuk penambahan stok, out untuk pengurangan',
-        quantity INT NOT NULL,
-        reference_type ENUM('order','return','adjustment','other') NOT NULL,
-        description VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (produk_id) REFERENCES produk(id) ON UPDATE CASCADE,
-        FOREIGN KEY (order_id) REFERENCES orders(id) ON UPDATE CASCADE,
-        FOREIGN KEY (return_id) REFERENCES returns(id) ON UPDATE CASCADE,
-        INDEX idx_produk_id (produk_id),
-        INDEX idx_order_id (order_id),
-        INDEX idx_return_id (return_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
 
     // Payments table
     "CREATE TABLE IF NOT EXISTS payments (
@@ -124,6 +106,25 @@ $sql = [
         FOREIGN KEY (return_id) REFERENCES returns(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
 
+    // Stock mutations table - VERSION TERBARU YANG SESUAI DENGAN PROGRAM
+    "CREATE TABLE IF NOT EXISTS stock_mutations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        produk_id INT NOT NULL,
+        order_id INT,
+        return_id INT,
+        type ENUM('in','out') NOT NULL COMMENT 'in untuk penambahan stok, out untuk pengurangan',
+        quantity INT NOT NULL,
+        reference_type ENUM('order','return','adjustment','other') NOT NULL,
+        description VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (produk_id) REFERENCES produk(id) ON UPDATE CASCADE,
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON UPDATE CASCADE,
+        FOREIGN KEY (return_id) REFERENCES returns(id) ON UPDATE CASCADE,
+        INDEX idx_produk_id (produk_id),
+        INDEX idx_order_id (order_id),
+        INDEX idx_return_id (return_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+    
     // Order logs table
     "CREATE TABLE IF NOT EXISTS order_logs (
         id INT NOT NULL AUTO_INCREMENT,
