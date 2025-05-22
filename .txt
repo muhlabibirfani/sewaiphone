@@ -14,3 +14,11 @@ git pull
 akhir tutor 
 tes git (kentung)
 tombol konfirmasi sudah fix
+
+To do list
+1. Menambahkan metode pembayaran (perbaikan)
+2. menambahkan fitur bila stock berubah jika sudah di acc oleh admin (done)
+3. Jika tidak di acc selama 24 jam maka otomatis di batalkan (ongoing)
+4. Menambahkan fitur crud pada produk (done)
+5. menambahkan status dipinjam (done)
+6. menambahkan fitur status saat sudah mengisi form pengembalian (done)
