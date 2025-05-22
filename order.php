@@ -20,7 +20,7 @@ $user_id = $_SESSION['user_id'];
 mysqli_begin_transaction($conn);
 
 try {
-    // Get product details (no need for FOR UPDATE since we're not modifying stock yet)
+    // Get product details
     $product_query = "SELECT * FROM produk WHERE id = $product_id";
     $product_result = mysqli_query($conn, $product_query);
     $product = mysqli_fetch_assoc($product_result);
@@ -29,7 +29,7 @@ try {
         throw new Exception("Produk tidak ditemukan");
     }
 
-    // Check stock availability (just for information, not locking)
+    // Check stock availability (just for display, don't reduce yet)
     if($product['stok_tersedia'] <= 0) {
         $_SESSION['error'] = "Maaf, produk ini sedang tidak tersedia";
         header("Location: index.php");
@@ -47,7 +47,7 @@ try {
         $errors = [];
         $tanggal_sewa = isset($_POST['tanggal_sewa']) ? trim($_POST['tanggal_sewa']) : '';
         $tanggal_kembali = isset($_POST['tanggal_kembali']) ? trim($_POST['tanggal_kembali']) : '';
-        $payment_method = isset($_POST['payment_method']) ? trim($_POST['payment_method']) : '';
+        $payment_method = 'transfer'; // Default payment method
 
         // Validate dates
         if (empty($tanggal_sewa) || empty($tanggal_kembali)) {
@@ -70,10 +70,10 @@ try {
             }
         }
 
-        // Check for overlapping reservations for confirmed orders only
+        // Check for overlapping reservations (exclude pending orders since they haven't reserved stock yet)
         $overlap_query = "SELECT id FROM orders 
                          WHERE produk_id = ? 
-                         AND status = 'confirmed' 
+                         AND status IN ('menunggupembayaran', 'menunggudikirim', 'dikirim', 'dipinjam') 
                          AND (
                              (? BETWEEN tanggal_sewa AND tanggal_kembali) 
                              OR (? BETWEEN tanggal_sewa AND tanggal_kembali) 
@@ -113,7 +113,7 @@ try {
         $insert_query = "INSERT INTO orders (
             produk_id, user_id, tanggal_sewa, tanggal_kembali, 
             total_harga, status, payment_method
-        ) VALUES (?, ?, ?, ?, ?, 'confirmed', ?)";
+        ) VALUES (?, ?, ?, ?, ?, 'pending', ?)";
         
         $stmt = mysqli_prepare($conn, $insert_query);
         mysqli_stmt_bind_param(
@@ -133,14 +133,7 @@ try {
 
         $new_order_id = mysqli_insert_id($conn);
 
-        // Update product stock
-        $update_stock = "UPDATE produk SET stok_tersedia = stok_tersedia - 1 WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $update_stock);
-        mysqli_stmt_bind_param($stmt, "i", $product_id);
-        
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new Exception("Gagal memperbarui stok: " . mysqli_error($conn));
-        }
+        // DON'T UPDATE STOCK HERE - it will be updated when admin changes status to 'menunggupembayaran'
 
         // Commit transaction
         mysqli_commit($conn);
@@ -151,10 +144,11 @@ try {
             'product_name' => $product['nama_produk'],
             'tanggal_sewa' => $tanggal_sewa,
             'tanggal_kembali' => $tanggal_kembali,
-            'total_harga' => $total_harga
+            'total_harga' => $total_harga,
+            'status' => 'pending'
         ];
 
-        // Redirect to success page instead of payment page
+        // Redirect to success page
         header("Location: order_success.php");
         exit();
     }
@@ -172,7 +166,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sewa <?php echo $product['nama']; ?> | Fanzzervice</title>
+    <title>Sewa <?php echo $product['nama_produk']; ?> | Fanzzervice</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -268,32 +262,19 @@ try {
             color: #28a745;
             font-weight: 500;
         }
-        .payment-methods {
+        .info-box {
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 5px;
+            padding: 15px;
             margin-bottom: 20px;
         }
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-family: inherit;
+        .info-box i {
+            color: #2196f3;
+            margin-right: 10px;
         }
-        .payment-icon {
-            margin-right: 15px;
-            font-size: 24px;
-            width: 40px;
-            text-align: center;
-        }
-        .payment-details {
-            flex: 1;
-        }
-        .payment-details h4 {
-            margin: 0 0 5px 0;
-        }
-        .payment-details p {
-            margin: 0;
-            font-size: 14px;
-            color: #666;
+        .info-box strong {
+            color: #1976d2;
         }
         @media (max-width: 600px) {
             .product-image {
@@ -315,6 +296,11 @@ try {
         <?php if (isset($_SESSION['error'])): ?>
             <div class="error"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
         <?php endif; ?>
+        
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <strong>Informasi Penting:</strong> Pesanan Anda akan dibuat dengan status "Pending". Stok produk akan dikurangi setelah admin mengkonfirmasi dan mengubah status menjadi "Menunggu Pembayaran".
+        </div>
         
         <div class="user-info">
             <h3>Informasi Penyewa</h3>
@@ -349,7 +335,7 @@ try {
                 <input type="date" id="tanggal_kembali" name="tanggal_kembali" required min="<?php echo date('Y-m-d'); ?>">
             </div>
             
-            <button type="submit">Konfirmasi Pesanan</button>
+            <button type="submit">Buat Pesanan</button>
         </form>
     </div>
     

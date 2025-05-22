@@ -208,23 +208,23 @@
         }
         
         .badge-menunggupembayaran {
-            background-color: #ffeeba;
-            color: #856404;
+            background-color: #ffeaa7;
+            color: #d63031;
         }
 
         .badge-menunggudikirim {
-            background-color:rgb(215, 245, 186);
-            color:rgb(90, 179, 7);
+            background-color: #d1f2eb;
+            color: #00b894;
         }
         
         .badge-dikirim {
-            background-color: #d4edda;
-            color: #155724;
+            background-color: #cce5ff;
+            color: #0984e3;
         }
         
         .badge-selesai {
-            background-color: #e2e3e5;
-            color: #383d41;
+            background-color: #d4edda;
+            color: #155724;
         }
         
         .badge-dibatalkan {
@@ -233,8 +233,8 @@
         }
         
         .badge-dipinjam {
-            background-color: #d1ecf1;
-            color: #0c5460;
+            background-color: #e1bee7;
+            color: #8e24aa;
         }
 
         .btn {
@@ -383,6 +383,19 @@
             border: 1px solid #f5c2c7;
         }
         
+        .info-box {
+            background-color: #e8f4f8;
+            border: 1px solid #17a2b8;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box i {
+            color: #17a2b8;
+            margin-right: 10px;
+        }
+        
         /* Responsive adjustments */
         @media (max-width: 992px) {
             .sidebar {
@@ -448,7 +461,7 @@
             </div>
             <ul class="sidebar-menu">
                 <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="./order.php"  class="active"><i class="fas fa-shopping-cart"></i> Pesanan</a></li>
+                <li><a href="./order.php" class="active"><i class="fas fa-shopping-cart"></i> Pesanan</a></li>
                 <li><a href="products.php"><i class="fas fa-mobile"></i> Produk</a></li>
                 <li><a href="./logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
@@ -475,6 +488,16 @@
                 <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
             </div>
             <?php endif; ?>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <strong>Cara Kerja Sistem:</strong> 
+                <ul style="margin: 10px 0 0 30px;">
+                    <li>Pesanan dibuat dengan status <strong>Pending</strong> (stok belum dikurangi)</li>
+                    <li>Ubah ke <strong>Menunggu Pembayaran</strong> untuk mengurangi stok</li>
+                    <li>Status <strong>Selesai</strong> atau <strong>Dibatalkan</strong> akan mengembalikan stok</li>
+                </ul>
+            </div>
 
             <div class="card">
                 <div class="card-header">
@@ -532,8 +555,19 @@
                                 <td><?php echo date('d M Y', strtotime($order['tanggal_kembali'])); ?></td>
                                 <td>Rp <?php echo number_format($order['total_harga'], 0, ',', '.'); ?></td>
                                 <td>
-                                    <span class="badge badge-<?php echo strtolower($order['status']); ?>">
-                                        <?php echo ucfirst($order['status']); ?>
+                                    <span class="badge badge-<?php echo strtolower(str_replace(' ', '', $order['status'])); ?>">
+                                        <?php 
+                                        $status_display = [
+                                            'pending' => 'Pending',
+                                            'menunggupembayaran' => 'Menunggu Pembayaran',
+                                            'menunggudikirim' => 'Menunggu Dikirim',
+                                            'dikirim' => 'Dikirim',
+                                            'dipinjam' => 'Dipinjam',
+                                            'selesai' => 'Selesai',
+                                            'dibatalkan' => 'Dibatalkan'
+                                        ];
+                                        echo $status_display[$order['status']] ?? ucfirst($order['status']);
+                                        ?>
                                     </span>
                                 </td>
                                 <td>

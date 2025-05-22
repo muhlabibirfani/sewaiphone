@@ -617,7 +617,7 @@ h2 {
             <h2>Metode Pembayaran</h2>
             
             <div class="payment-methods">
-                <div class="payment-option" data-method="transfer">
+                <!-- <div class="payment-option" data-method="transfer">
                     <div class="payment-icon">
                         <i class="fas fa-university"></i>
                     </div>
@@ -626,7 +626,7 @@ h2 {
                         <p>Transfer melalui ATM, Internet Banking, atau Mobile Banking</p>
                     </div>
                     <input type="radio" name="payment_method" value="transfer" id="method_transfer">
-                </div>
+                </div> -->
                 
                 <div class="payment-option" data-method="qris">
                     <div class="payment-icon">
