@@ -165,7 +165,7 @@ if ($row['count'] == 0) {
         ('iPhone 14 Pro Max', 'iPhone 14 Pro Max', 200000.00, 'iphone14.jpg', 0, 5, 5, '2025-05-09 09:06:25');",
         
         "INSERT INTO produk (nama_produk, deskripsi, harga_sewa, gambar, is_new, stok, stok_tersedia, created_at) VALUES
-        ('iPhone 13', 'iPhone 13 128GB, chip A15 Bionic, baterai tahan lama', 150000.00, 'iphone13.jpg', 0, 4, 4, '2025-05-09 09:06:25');"
+        ('iPhone 13', 'iPhone 13 Pro', 150000.00, 'iphone13.jpg', 0, 4, 4, '2025-05-09 09:06:25');"
     ];
 
     foreach ($sample_products as $product_query) {

@@ -617,17 +617,6 @@ h2 {
             <h2>Metode Pembayaran</h2>
             
             <div class="payment-methods">
-                <div class="payment-option" data-method="transfer">
-                    <div class="payment-icon">
-                        <i class="fas fa-university"></i>
-                    </div>
-                    <div class="payment-details">
-                        <h4>Transfer Bank</h4>
-                        <p>Transfer melalui ATM, Internet Banking, atau Mobile Banking</p>
-                    </div>
-                    <input type="radio" name="payment_method" value="transfer" id="method_transfer">
-                </div>
-                
                 <div class="payment-option" data-method="qris">
                     <div class="payment-icon">
                         <i class="fas fa-qrcode"></i>
@@ -665,6 +654,11 @@ h2 {
                     <label for="transaction_id">ID Transaksi QRIS</label>
                     <input type="text" name="transaction_id" id="transaction_id" placeholder="Masukkan ID transaksi" required>
                 </div>
+<!--                 
+                <div class="form-group">
+                    <label for="payment_proof">Unggah Bukti Transfer</label>
+                    <input type="file" name="payment_proof" id="payment_proof" accept="image/jpeg,image/png,image/jpg,application/pdf">
+                </div> -->
                 
                 <div class="form-group">
                     <label for="notes">Catatan (Opsional)</label>

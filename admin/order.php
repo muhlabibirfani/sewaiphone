@@ -526,6 +526,7 @@
                                 <th>Tgl Kembali</th>
                                 <th>Total</th>
                                 <th>Status</th>
+                                <th>ID Transaksi</th>
                                 <th>Kode Pengiriman</th>
                                 <th>Edit</th>
                             </tr>
@@ -536,10 +537,12 @@
                             $where = $status ? "WHERE o.status = '$status'" : "";
 
                             $query = "SELECT o.id, u.name as customer, p.nama_produk as product, 
-                                     o.tanggal_sewa, o.tanggal_kembali, o.total_harga, o.status, o.shipping_code
+                                     o.tanggal_sewa, o.tanggal_kembali, o.total_harga, o.status, o.shipping_code,
+                                     pay.transaction_id
                                      FROM orders o
                                      JOIN users u ON o.user_id = u.id
                                      JOIN produk p ON o.produk_id = p.id
+                                     LEFT JOIN payments pay ON o.id = pay.order_id
                                      $where
                                      ORDER BY o.created_at DESC";
                             $result = mysqli_query($conn, $query);
@@ -571,6 +574,9 @@
                                     </span>
                                 </td>
                                 <td>
+                                    <?php echo $order['transaction_id'] ? htmlspecialchars($order['transaction_id']) : '-'; ?>
+                                </td>
+                                <td>
                                     <?php echo ($order['shipping_code'] && $order['status'] === 'dikirim') ? htmlspecialchars($order['shipping_code']) : '-'; ?>
                                 </td>
                                 <td>
@@ -584,7 +590,7 @@
                             <?php 
                                 endwhile;
                             } else {
-                                echo '<tr><td colspan="9" style="text-align: center;">Tidak ada pesanan ditemukan</td></tr>';
+                                echo '<tr><td colspan="10" style="text-align: center;">Tidak ada pesanan ditemukan</td></tr>';
                             }
                             ?>
                         </tbody>
