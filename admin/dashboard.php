@@ -324,6 +324,7 @@
                 <li><a href="dashboard.php" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="order.php"><i class="fas fa-shopping-cart"></i> Pesanan</a></li>
                 <li><a href="products.php"><i class="fas fa-mobile"></i> Produk</a></li>
+                <!-- <li><a href="pelanggan.php"><i class="fas fa-users"></i> Pelanggan</a></li> -->
                 <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
