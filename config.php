@@ -5,7 +5,7 @@ session_start();
 $host = 'localhost';
 $username = 'root';
 $password = '';
-$database = 'fanzzervicetes2';
+$database = 'fanzzervice';
 
 // Create connection
 $conn = mysqli_connect($host, $username, $password, $database);
