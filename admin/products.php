@@ -349,18 +349,16 @@ $base_url = "/uas2"; // Sesuaikan dengan base URL website Anda
                             <?php 
                             if (mysqli_num_rows($result) > 0):
                                 while ($produk = mysqli_fetch_assoc($result)): 
-                                    // Tentukan path gambar yang benar
                                     $gambar_path = "";
                                     if (!empty($produk['gambar'])) {
-                                        // Coba beberapa kemungkinan path
                                         $possible_paths = [
                                             "/images/{$produk['gambar']}",
                                             "/uas2/images/{$produk['gambar']}",
+                                            "/htdocs/images/{$produk['gambar']}",
                                             "../images/{$produk['gambar']}",
                                             "../../images/{$produk['gambar']}"
                                         ];
                                         
-                                        // Gunakan path relatif terhadap root
                                         $gambar_path = "/uas2/images/{$produk['gambar']}";
                                     }
                             ?>
@@ -414,7 +412,6 @@ $base_url = "/uas2"; // Sesuaikan dengan base URL website Anda
     </div>
     
     <script>
-        // Mobile menu toggle
         document.getElementById('mobileMenuBtn').addEventListener('click', function() {
             document.getElementById('sidebar').classList.toggle('active');
         });
@@ -424,7 +421,7 @@ $base_url = "/uas2"; // Sesuaikan dengan base URL website Anda
             // Log base URL for debugging
             console.log("Base URL: <?php echo $base_url; ?>");
             
-            // Add fallback for images that fail to load
+            // Function if images fail to load
             var images = document.querySelectorAll('img.product-image-thumb');
             images.forEach(function(img) {
                 img.addEventListener('error', function() {
