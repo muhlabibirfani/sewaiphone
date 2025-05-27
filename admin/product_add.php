@@ -40,25 +40,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['stok'] = 'Stok harus berupa angka positif';
     }
     
-    // Handle image upload
+    // Handle image upload - PERTAHANKAN NAMA FILE ASLI SEPENUHNYA
     if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] === UPLOAD_ERR_OK) {
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
         $file_type = $_FILES['gambar']['type'];
         
         if (in_array($file_type, $allowed_types)) {
-            $upload_dir = '../../images/products/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
+            $upload_dir = '../images/products/';
+            
+            // Cek dan buat direktori jika belum ada
+            if (!file_exists($upload_dir)) {
+                if (!mkdir($upload_dir, 0755, true)) {
+                    $errors['gambar'] = 'Gagal membuat direktori upload';
+                }
             }
             
-            $file_name = $_FILES['gambar']['name'];
-            $file_path = $upload_dir . $file_name;
-            
-             if (move_uploaded_file($_FILES['gambar']['tmp_name'], $file_path)) {
-                // Store only the filename in the database
-                $produk['gambar'] = $file_name;
+            // Validasi ukuran file (maksimal 2MB)
+            if ($_FILES['gambar']['size'] > 2 * 1024 * 1024) {
+                $errors['gambar'] = 'Ukuran file terlalu besar (maksimal 2MB)';
             } else {
-                $errors['gambar'] = 'Gagal mengunggah gambar';
+                // GUNAKAN NAMA FILE ASLI TANPA MODIFIKASI
+                $original_name = $_FILES['gambar']['name'];
+                $file_path = $upload_dir . $original_name;
+                
+                if (move_uploaded_file($_FILES['gambar']['tmp_name'], $file_path)) {
+                    // Store original filename in database
+                    $produk['gambar'] = $original_name;
+                } else {
+                    $errors['gambar'] = 'Gagal mengunggah gambar';
+                }
             }
         } else {
             $errors['gambar'] = 'Format file tidak didukung (hanya JPEG, PNG, GIF)';
@@ -318,7 +328,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="form-group">
                             <label for="harga_sewa">Harga Sewa (Rp) <span class="text-muted">(wajib diisi)</span></label>
                             <input type="number" id="harga_sewa" name="harga_sewa" class="form-control" 
-                                   value="<?php echo htmlspecialchars($product['harga_sewa']); ?>" required>
+                                   value="<?php echo htmlspecialchars($produk['harga_sewa']); ?>" required>
                             <?php if(isset($errors['harga_sewa'])): ?>
                                 <span class="error-message"><?php echo $errors['harga_sewa']; ?></span>
                             <?php endif; ?>
@@ -345,6 +355,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <span id="previewText">Pilih gambar untuk melihat preview</span>
                             </div>
                             <input type="file" id="gambar" name="gambar" class="form-control" accept="image/*" required>
+                            <small class="text-muted">Format yang didukung: JPEG, PNG, GIF. Maksimal 2MB. Nama file asli akan dipertahankan.</small>
                             <?php if(isset($errors['gambar'])): ?>
                                 <span class="error-message"><?php echo $errors['gambar']; ?></span>
                             <?php endif; ?>
@@ -386,6 +397,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const file = this.files[0];
             
             if (file) {
+                // Validasi ukuran file
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran file terlalu besar. Maksimal 2MB.');
+                    this.value = '';
+                    return;
+                }
+                
                 const reader = new FileReader();
                 
                 previewText.style.display = "none";
