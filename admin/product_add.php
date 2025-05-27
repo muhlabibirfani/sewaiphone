@@ -18,16 +18,16 @@ $produk = [
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Basic product info
+    // Produk Info
     $produk['nama_produk'] = clean_input($_POST['nama_produk']);
     $produk['deskripsi'] = clean_input($_POST['deskripsi']);
     $produk['harga_sewa'] = clean_input($_POST['harga_sewa']);
     $produk['stok'] = clean_input($_POST['stok']);
-    $produk['stok_tersedia'] = $produk['stok']; // Set stok tersedia sama dengan stok awal
+    $produk['stok_tersedia'] = $produk['stok'];
     $produk['is_new'] = isset($_POST['is_new']) ? 1 : 0;
     $produk['gambar'] = isset($_FILES['gambar']);
 
-    // Validate inputs
+    // Validasi input
     if (empty($produk['nama_produk'])) {
         $errors['nama_produk'] = 'Nama produk wajib diisi';
     }
@@ -40,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['stok'] = 'Stok harus berupa angka positif';
     }
     
-    // Handle image upload - PERTAHANKAN NAMA FILE ASLI SEPENUHNYA
     if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] === UPLOAD_ERR_OK) {
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
         $file_type = $_FILES['gambar']['type'];
@@ -48,23 +47,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (in_array($file_type, $allowed_types)) {
             $upload_dir = '../images/products/';
             
-            // Cek dan buat direktori jika belum ada
             if (!file_exists($upload_dir)) {
                 if (!mkdir($upload_dir, 0755, true)) {
                     $errors['gambar'] = 'Gagal membuat direktori upload';
                 }
             }
             
-            // Validasi ukuran file (maksimal 2MB)
             if ($_FILES['gambar']['size'] > 2 * 1024 * 1024) {
                 $errors['gambar'] = 'Ukuran file terlalu besar (maksimal 2MB)';
             } else {
-                // GUNAKAN NAMA FILE ASLI TANPA MODIFIKASI
                 $original_name = $_FILES['gambar']['name'];
                 $file_path = $upload_dir . $original_name;
                 
                 if (move_uploaded_file($_FILES['gambar']['tmp_name'], $file_path)) {
-                    // Store original filename in database
                     $produk['gambar'] = $original_name;
                 } else {
                     $errors['gambar'] = 'Gagal mengunggah gambar';
@@ -77,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['gambar'] = 'Gambar produk wajib diisi';
     }
     
-    // If no errors, insert the product
     if (empty($errors)) {
         $query = "INSERT INTO produk (
             nama_produk, 
@@ -293,8 +287,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="admin-container">
-        <!-- Sidebar would be included here -->
-        
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
@@ -382,12 +374,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     
     <script>
-        // Mobile menu toggle
         document.getElementById('mobileMenuBtn').addEventListener('click', function() {
             document.getElementById('sidebar').classList.toggle('active');
         });
         
-        // Image preview
         const imageInput = document.getElementById('gambar');
         const imagePreview = document.getElementById('imagePreview');
         const previewImage = document.getElementById('previewImage');
