@@ -20,9 +20,6 @@
             <h1>Pengen Gengsi Naik Tanpa Pinjol?</h1>
             <p>Sewa iphone disini aja, kami menyediakan berbagai pilihan iphone untuk anda. Nikmati pengalaman menggunakan iPhone terbaru tanpa perlu pinjol.</p>
             <div class="btn-group">
-                <a href="#products" class="btn">
-                    <i class="fas fa-eye"></i> Lihat Produk
-                </a>
             </div>
         </div>
     </section>

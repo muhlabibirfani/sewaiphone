@@ -324,7 +324,7 @@ $base_url = "/uas2"; // Sesuaikan dengan base URL website Anda
                 </div>
             <?php endif; ?>
             
-            <div class="card">
+            <div class="card">;''
                 <div class="card-header">
                     <h3>Daftar Produk</h3>
                     <a href="./product_add.php" class="btn btn-primary add-product-btn">
@@ -359,7 +359,7 @@ $base_url = "/uas2"; // Sesuaikan dengan base URL website Anda
                                             "../../images/{$produk['gambar']}"
                                         ];
                                         
-                                        $gambar_path = "/uas2/images/{$produk['gambar']}";
+                                        $gambar_path = "../images/{$produk['gambar']}";
                                     }
                             ?>
                             <tr>
