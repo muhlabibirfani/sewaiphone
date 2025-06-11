@@ -9,9 +9,9 @@ Fanzzervice adalah suatu situs penyewaan iphone berbasis website yang memudahkan
 - **Riwayat Pesanan** : pengguna dapat mengecek status pesanan.
 - **Form Pengembalian** :pengguna dapat mengecek riwayat pesanan.
 - **Pembayaran** : Mendukung fitur pembay
-- **Dashboard Admin** : admin dapat menambahkan, mengedit, dan menghapus produk serta pengguna.
+- **Dashboard Admin** : admin dapat menambahkan, mengedit, menghapus produk serta melihat informasi pengguna.
 
-## Teknologi yang Digunakan
+## Bahasa Pemrograman yang Di pakai
 
 - **HTML**
 - **PHP**
