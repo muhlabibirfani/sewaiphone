@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/58314b22-57d1-4494-9500-634ea9c9ed57)# Fanzzervice
+# Fanzzervice
 
 Fanzzervice adalah suatu situs penyewaan iphone berbasis website yang memudahkan pengguna untuk meminjam iphone secara online. Sistem ini mendukung fitur peminjaman iphone, pembayaran, pengembalian, serta dashboard admin untuk pengelolaan data pesanan, produk, dan juga pengguna.
 
