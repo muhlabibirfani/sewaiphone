@@ -20,3 +20,39 @@ Fanzzervice adalah suatu situs penyewaan iphone berbasis website yang memudahkan
 - **MySQL** (database)
 
 ## Cara Menjalankan Project
+
+### 1. Siapkan VSCode
+- Install VSCode jika belum punya
+- Buka VSCode
+
+### 2. Clone Repository
+```sh
+git clone https://github.com/muhlabibirfani/sewaiphone.git
+cd sewaiphone
+```
+
+### 3. Jalankan XAMPP
+- Pastikan sudah menginstal XAMPP
+- Buka XAMPP dan nyalakan server Apache & MySql
+
+### 4. Import Database
+- buka browser dan jalankan
+```sh
+localhost/phpmyadmin/
+```
+- Buat database dengan nama fanzzervice
+- Buka VSCode lalu jalankan code berikut
+```sh
+cd setup_database.php
+```
+
+### 5. Menjalakan WEB
+- Buka browser dan jalankan
+```sh
+localhost/sewaiphone/
+```
+
+# Dibuat Oleh
+- ITB_MuhammadLabibIrfani_52
+- ITB_MuhammadRizkyZuhriansyah_33
+- ITB_DamarWisnuAngjaya_50
